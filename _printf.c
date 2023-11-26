@@ -1,75 +1,48 @@
 #include "main.h"
 /**
- * print_all - chose the right function
- * @ch: character
- * Return: 0
- */
-int (*print_all(const char ch))(va_list)
-{
-    int kk=0;
-
-    list_t printf[] = {
-        {'c', print_character},
-        {'s', print_string},
-        {'d', print_integer},
-        {'i', print_integer},
-        {'\0', NULL}};
-
-    while (printf[kk].specifiers != '\0')
-    {
-        if (ch == (printf[kk].specifiers))
-        {
-            return (printf[kk].f);
-        }
-        kk++;
-    }
-    return (0);
-}
-
-/**
- * _printf - printf function that print character, integer and string
- * @format: variable
- * Return: -1,j,0
+ * _printf - outputs a formatted string.
+ * @format: input string containg various arguments.
+ *
+ * Return: interger
  */
 int _printf(const char *format, ...)
 {
-    va_list ap;
-    unsigned int i = 0, j = 0;
-
-    if (format==NULL)
-        return (-1);
-
-    va_start(ap, format);
-    for (i = 0; format[i] != '\0'; i++)
-    {
-        if (format[i] == '%')
-        {
-            if (format[i + 1] == '\0')
-                return (-1);
-
-            else if (format[i + 1] == '%')
-            {
-                _putchar('%');
-                j++;
-                i++;
-            }
-            else if (print_all(format[i + 1]) != NULL)
-            {
-                j += (print_all(format[i + 1]))(ap);
-                i++;
-            }
-            else
-			{
-				_putchar(format[i]);
-				j++;
-			}
-        }
-        else
-        {
-            _putchar(format[i]);
-            j++;
-        }
-    }
-    va_end(ap);
-    return (j);
+int i = 0;
+va_list args;
+int (*function)(va_list) = NULL;
+if (format == NULL || (format[0] == '%' && format[1] == '\0'))
+return (-1);
+va_start(args, format);
+while (*format)
+{
+if (*format == '%' && *(format + 1) != '%')
+{
+format++;
+function = select_func(*format);
+if (*(format) == '\0')
+return (-1);
+else if (function == NULL)
+{
+_putchar(*(format - 1));
+_putchar(*format);
+i += 2;
+}
+else
+i += function(args);
+}
+else if (*format == '%' && *(format + 1) == '%')
+{
+format++;
+_putchar('%');
+i++;
+}
+else
+{
+_putchar(*format);
+i++;
+}
+format++;
+}
+va_end(args);
+return (i);
 }
